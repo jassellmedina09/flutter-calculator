@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expressions/expressions.dart';
+import 'dart:math';  // Import math library for pow function
 
 void main() {
   runApp(const CalculatorApp());
@@ -38,6 +39,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _calculate();  // Evaluate expression on '='
     } else if (value == 'C') {
       _clear();  // Clear input and result on 'C'
+    } else if (value == 'x²') {
+      _squareLastOperand();  // Handle squaring operation for last operand
+    } else if (value == '%') {
+      setState(() {
+        _expression += '%';  // Handle modulo operation
+      });
     } else {
       setState(() {
         _expression += value;  // Accumulate the expression
@@ -51,6 +58,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _expression = '';
       _result = '';
     });
+  }
+
+  // Square the last operand in the expression
+  void _squareLastOperand() {
+    try {
+      // Use regular expression to find the last number in the expression
+      final lastNumber = RegExp(r'([0-9.]+)$').firstMatch(_expression)?.group(0);
+      
+      if (lastNumber != null) {
+        final number = double.parse(lastNumber);
+        final squaredValue = pow(number, 2);
+
+        // Replace the last number in the expression with its square
+        setState(() {
+          _expression = _expression.replaceFirst(lastNumber, squaredValue.toString());
+          _result = squaredValue.toString();
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _result = 'Error';  // Show error message for invalid expressions
+      });
+    }
   }
 
   // Evaluate the current expression
@@ -150,6 +180,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   _buildButton('C', color: Colors.red),
                   _buildButton('=', color: Colors.green),
                   _buildButton('+', color: Colors.orange),
+                ],
+              ),
+              Row(
+                children: [
+                  _buildButton('x²', color: Colors.purple),  // Square button
+                  _buildButton('%', color: Colors.purple),   // Modulo button
                 ],
               ),
             ],
